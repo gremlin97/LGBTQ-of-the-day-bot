@@ -47,8 +47,8 @@ def write_on_image(text):
     image = Image.open(f'{DIR}/{file}')
     i = 0
 
-    #changed default x, y values so that the else part shows up in center
-    
+    # changed default x, y values so that the else part shows up in center
+
     x = (image.width/2) - 260
     y = 380
 
@@ -63,7 +63,7 @@ def write_on_image(text):
         for i in range(divisions+1):
             line = text[:35]
             if i == divisions:
-                write_line(image, text[:], x, y)    
+                write_line(image, text[:], x, y)
             write_line(image, line[:line.rfind(' ')], x, y)
             text = text.replace(line[:line.rfind(' ')+1], "")
             y += 35
@@ -76,18 +76,16 @@ def write_on_image(text):
 
 
 DIR = 'img_bg'
+OUT_DIR = 'img_post'
+
 images = images_list(DIR)
 font_type = ImageFont.truetype('arial.ttf', 40)
 font_type2 = ImageFont.truetype('arial.ttf', 40*2)
 
-def run(x):
-    for i in range(x):
-        image = Image.open(f'{DIR}/{random_image(images)}')
-        text = get_tweet()
-        # print(text)
-        new_image = write_on_image(text)
-        new_image[0].save(f'post_{new_image[1]}')
 
-        new_image[0].show()
-
-run(1)
+def get_img_for_tweet(tweet_text):
+    image = Image.open(f'{DIR}/{random_image(images)}')
+    new_image = write_on_image(tweet_text)
+    new_image_path = f'{OUT_DIR}/post_{new_image[1]}'
+    new_image[0].save(f'{new_image_path}')
+    return new_image_path

@@ -5,11 +5,14 @@ Vicki Langer (@vicki_langer)
 '''
 
 import tweepy
-# import time
+import time
+import random
 
-from os import environ
+from os import environ, remove
 
-from get_tweet import get_tweet
+# from get_tweet import get_tweet
+from get_tweet_content import get_tweet_content
+from get_img_for_tweet import get_img_for_tweet
 # from get_reply import get_reply
 
 
@@ -28,19 +31,37 @@ def authenticate_api():
         print(f"An error occurred when attempting to authenticate with the twitter API. reason: {error}")
 
 
-
 def main():
     api = authenticate_api()
     #reply_with = get_reply()
 
+    # choose tweet
+
     print("finding a tweet...")
-    tweet = get_tweet()
-    print("chose tweet: " + tweet)
-    tweet = api.update_status(tweet)  # variable used later for reply to this tweet
+    tweet_content = get_tweet_content()
+    print("chose tweet: " + tweet_content["text"])
+
+    try:
+        # obtain image
+        image_path = get_img_for_tweet(tweet_content["text"])
+
+        # prepare image
+        image = api.media_upload(image_path)
+        # add alt-text
+        api.create_media_metadata(image.media_id, alt_text=tweet_content["text"])
+    except Exception as error:
+        print(f"An error occurred while generating image. reason: {error}")
+
+    # Post tweet
+    tweet = api.update_status(status=tweet_content["text"],
+                              media_ids=[image.media_id])  # variable used later for reply to this tweet
     print('tweet has been tweeted')
     #api.update_status(status=reply_with, in_reply_to_status_id=tweet.id, auto_populate_reply_metadata=True)
     #print('chose reply:' + reply_with)
     #print('reply has been tweeted')
 
+    # delete image once posted
+    remove(image_path)
 
-main()
+if __name__ == "__main__":
+    main()
